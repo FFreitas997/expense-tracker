@@ -1,6 +1,6 @@
-﻿namespace Application.Common.Pagination;
+﻿namespace Infrastructure.Repositories.Queries;
 
-public class PaginationResponseDto<T>
+public class PaginationResult<T>
 {
     public IReadOnlyList<T> Items { get; set; } = [];
 

@@ -17,4 +17,10 @@ public class InMemoryCacheSettings
 
     // Enables cache hit/miss statistics; should be disabled in production due to performance overhead
     public bool TrackStatistics { get; set; } = false;
+
+    // Maximum time a cache entry can live regardless of access patterns
+    public TimeSpan AbsoluteExpiration { get; set; } = TimeSpan.FromHours(1);
+
+    // Time a cache entry can remain idle before expiring; resets on each access
+    public TimeSpan SlidingExpiration { get; set; } = TimeSpan.FromMinutes(10);
 }

@@ -30,10 +30,16 @@ builder.Services.AddApplication();
 // Add infrastructure services
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
+// Add exception handling services and configure ProblemDetails
+builder.Services.AddExceptionHandling();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Add global exception handling middleware
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
@@ -58,13 +64,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors(CorsExtension.CorsPolicyName);
-
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.UseRateLimiter();
 
 app.MapControllers();
-
 app.Run();

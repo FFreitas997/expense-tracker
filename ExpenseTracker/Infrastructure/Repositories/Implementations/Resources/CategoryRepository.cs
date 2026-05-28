@@ -1,5 +1,8 @@
 ﻿using Domain.Entities;
 using Infrastructure.Repositories.Interfaces.Resources;
+using Infrastructure.Repositories.Queries;
+using Infrastructure.Repositories.Queries.Category;
+using Infrastructure.Repositories.Queries.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -7,67 +10,72 @@ namespace Infrastructure.Repositories.Implementations.Resources;
 
 public class CategoryRepository(ILogger<CategoryRepository> logger, AppDbContext dbContext) : ICategoryRepository
 {
-    public async Task<Category?> CreateAsync(Category entity, CancellationToken ct = default)
+    public async Task<Category> CreateAsync(Category entity, CancellationToken ct = default)
     {
-        logger.LogDebug("Creating category with name: {Name}", entity.Name);
-
+        logger.LogInformation("Creating category with ID {CategoryId}", entity.Id);
         await dbContext.Categories.AddAsync(entity, ct);
-
-        //cache.Remove(CacheKeyAll);
-
         return entity;
     }
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        logger.LogDebug("Getting category with ID: {Id}", id);
-
+        logger.LogInformation("Fetching category with ID {CategoryId}", id);
         return await dbContext.Categories
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, ct);
     }
 
-    public async Task<Category?> UpdateAsync(Category entity, CancellationToken ct = default)
+    public async Task<Category> UpdateAsync(Category entity, CancellationToken ct = default)
     {
-        logger.LogDebug("Updating category with ID: {Id}", entity.Id);
+        logger.LogInformation("Updating category with ID {CategoryId}", entity.Id);
+        dbContext.Categories.Update(entity);
 
-        var cat = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == entity.Id, ct);
-
-        if (cat is null) return null;
-
-        cat.Name = entity.Name;
-        cat.Icon = entity.Icon;
-        cat.Color = entity.Color;
-        cat.IsDefault = entity.IsDefault;
-
-        cat.ModifiedAt = DateTime.UtcNow;
-        cat.ModifiedBy = entity.ModifiedBy;
-
-        dbContext.Categories.Update(cat);
-
-        //cache.Remove(CacheKey(entity.Id));
-        //cache.Remove(CacheKeyAll);
-
-        return cat;
+        return await Task.FromResult(entity);
     }
 
     public Task DeleteAsync(Category entity, CancellationToken ct = default)
     {
-        logger.LogDebug(" Deleting category with ID: {Id}", entity.Id);
-
         if (entity.Id == Guid.Empty)
-            throw new ArgumentException("Invalid category ID");
+            throw new ArgumentException("Invalid category ID.", nameof(entity));
 
+        logger.LogInformation("Deleting category with ID {CategoryId}", entity.Id);
         dbContext.Categories.Remove(entity);
-
-        //cache.Remove(CacheKey(entity.Id));
-        //cache.Remove(CacheKeyAll);
 
         return Task.CompletedTask;
     }
 
-    public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken ct = default)
+    public async Task<PaginationResult<Category>> Search(CategoryQuery req, CancellationToken ct = default)
     {
-        return await dbContext.Categories.AsNoTracking().ToListAsync(ct);
+        logger.LogInformation("Searching categories with query {Query}", req);
+        var query = dbContext.Categories.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(req.Name))
+        {
+            var search = $"%{req.Name.ToLowerInvariant().Trim()}%";
+            query = query.Where(c => EF.Functions.Like(c.Name, search));
+        }
+
+        if (req.SortBy.HasValue)
+            query = req.SortBy.Value switch
+            {
+                CategorySortBy.Name => req.SortOrder == SortOrder.Asc
+                    ? query.OrderBy(c => c.Name)
+                    : query.OrderByDescending(c => c.Name),
+                _ => query
+            };
+
+        var totalItems = await query.CountAsync(ct);
+        var content = await query
+            .Skip((req.Page - 1) * req.Size)
+            .Take(req.Size)
+            .ToListAsync(ct);
+
+        return new PaginationResult<Category>
+        {
+            TotalItems = totalItems,
+            Items = content,
+            Page = req.Page,
+            Size = req.Size
+        };
     }
 }

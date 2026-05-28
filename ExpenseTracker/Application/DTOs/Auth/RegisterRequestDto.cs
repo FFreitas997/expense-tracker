@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Application.DTOs.Auth;
 
-namespace Application.DTOs.Auth
+internal class RegisterRequestDto
 {
-    internal class RegisterRequestDto
-    {
-    }
 }

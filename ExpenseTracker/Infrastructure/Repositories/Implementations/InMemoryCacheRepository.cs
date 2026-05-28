@@ -1,17 +1,24 @@
 ﻿using System.Collections.Concurrent;
 using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Settings;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Repositories.Implementations;
 
-public class InMemoryCacheRepository(IMemoryCache cache, ILogger<InMemoryCacheRepository> logger) : ICacheRepository
+public class InMemoryCacheRepository(
+    IMemoryCache cache,
+    ILogger<InMemoryCacheRepository> logger,
+    IOptions<InMemoryCacheSettings> settings
+) : ICacheRepository
 {
-    // Tracks all live cache keys to support future bulk-invalidation scenarios
-    private readonly ConcurrentDictionary<string, byte> _cacheKeys = new();
+    private readonly InMemoryCacheSettings _settings = settings.Value;
+
+    // One semaphore per key — never disposed so waiting threads are never handed a disposed instance
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
-    public async Task<T?> GetOrCreateAsync<T>(string key, T? value, CancellationToken ct = default) where T : class
+    public async Task<T?> GetOrCreateAsync<T>(string key, Func<CancellationToken, Task<T?>> factory, CancellationToken ct = default) where T : class
     {
         if (cache.TryGetValue(key, out T? cachedValue))
         {
@@ -31,11 +38,11 @@ public class InMemoryCacheRepository(IMemoryCache cache, ILogger<InMemoryCacheRe
                 return cachedValue;
             }
 
+            var value = await factory(ct);
+
             if (value is not null)
             {
-                cache.Set(key, value, CreateDefaultCacheOptions());
-                _cacheKeys.TryAdd(key, 0);
-
+                cache.Set(key, value, CreateCacheOptions());
                 logger.LogDebug("Cache entry created for key '{Key}'.", key);
             }
 
@@ -44,29 +51,20 @@ public class InMemoryCacheRepository(IMemoryCache cache, ILogger<InMemoryCacheRe
         finally
         {
             semaphore.Release();
-
-            // Remove the semaphore once the entry is created — it is only needed to prevent stampedes during initial population
-            if (_locks.TryRemove(key, out var removed))
-                removed.Dispose();
         }
     }
 
-    public void Remove(string key)
+    public Task RemoveAsync(string key, CancellationToken ct = default)
     {
         cache.Remove(key);
-        _cacheKeys.TryRemove(key, out _);
-
         logger.LogDebug("Cache entry removed for key '{Key}'.", key);
+        return Task.CompletedTask;
     }
 
-    private static MemoryCacheEntryOptions CreateDefaultCacheOptions()
+    private MemoryCacheEntryOptions CreateCacheOptions() => new()
     {
-        return new MemoryCacheEntryOptions
-        {
-            Size = 1,
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
-            SlidingExpiration = TimeSpan.FromMinutes(10),
-            Priority = CacheItemPriority.Normal
-        };
-    }
+        Size = 1,
+        AbsoluteExpirationRelativeToNow = _settings.AbsoluteExpiration,
+        SlidingExpiration = _settings.SlidingExpiration,
+    };
 }

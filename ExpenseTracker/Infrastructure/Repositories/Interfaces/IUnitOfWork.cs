@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Infrastructure.Repositories.Interfaces.Resources;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Infrastructure.Repositories.Interfaces;
 
@@ -13,15 +14,5 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
-    Task ExecuteInTransactionAsync(
-        Func<CancellationToken, Task> operation,
-        IsolationLevel level = IsolationLevel.ReadCommitted,
-        CancellationToken ct = default
-    );
-
-    Task<T> ExecuteInTransactionAsync<T>(
-        Func<CancellationToken, Task<T>> operation,
-        IsolationLevel level = IsolationLevel.ReadCommitted,
-        CancellationToken ct = default
-    );
+    Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level, CancellationToken ct = default);
 }

@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Threading.RateLimiting;
 using API.Settings;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Extensions;
@@ -30,12 +31,35 @@ public static class RateLimitingExtension
             // Set the default rejection status code to 429 Too Many Requests
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+            /*
+                Define a rate limiter named "fixed" using the Fixed Window algorithm with settings from configuration.
+                You must apply this limiter to specific endpoints or globally as needed.
+
+                options.AddFixedWindowLimiter("fixed", cfg =>
+                {
+                    cfg.PermitLimit = settings.PermitLimit;
+                    cfg.Window = TimeSpan.FromMinutes(settings.WindowMinutes);
+                    cfg.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    cfg.QueueLimit = settings.QueueLimit;
+                });
+            */
+
+
+            /*
+                Add a custom policy named "per-user" that applies rate limiting based on the authenticated user's ID.
+                You can implement the logic inside the lambda to create a partition key based on the user's identity.
+                To apply this policy, you would use the [EnableRateLimiting("per-user")] attribute on your controllers or actions.
+
+                options.AddPolicy("per-user", context => { });
+            */
+
             // Configure a global rate limiter that applies to all requests
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
             {
                 // Use RemoteIpAddress directly — never trust X-Forwarded-For without validated ForwardedHeaders middleware
                 var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
+                // Allow unlimited requests from localhost during development to avoid hindering local testing
                 if (env.IsDevelopment() && IsLocalhost(ip))
                     return RateLimitPartition.GetNoLimiter<string>("localhost");
 
@@ -111,7 +135,22 @@ public static class RateLimitingExtension
         if (!context.HttpContext.Response.HasStarted)
         {
             context.HttpContext.Response.ContentType = "application/json";
-            await context.HttpContext.Response.WriteAsJsonAsync(new
+
+            var problemDetailsFactory = context.HttpContext.RequestServices
+                .GetRequiredService<ProblemDetailsFactory>();
+
+            var response = problemDetailsFactory.CreateProblemDetails(
+                context.HttpContext,
+                StatusCodes.Status429TooManyRequests,
+                "Too Many Requests",
+                detail: $"You have exceeded the allowed number of requests. " +
+                        $"Please wait {settings.RetryAfterSeconds} seconds before trying again." +
+                        $"Reset time: {resetTime:o}"
+            );
+
+            await context.HttpContext.Response.WriteAsJsonAsync(response, ct);
+
+            /*await context.HttpContext.Response.WriteAsJsonAsync(new
             {
                 error = "Too many requests. Please try again later.",
                 message = $"You have exceeded the allowed number of requests. " +
@@ -119,7 +158,7 @@ public static class RateLimitingExtension
                 statusCode = StatusCodes.Status429TooManyRequests,
                 retryAfterSeconds = settings.RetryAfterSeconds,
                 resetTime = resetTime.ToString("o")
-            }, ct);
+            }, ct);*/
         }
     }
 

@@ -18,6 +18,8 @@ internal static class MemoryCacheExtension
         if (settings is null)
             throw new InvalidOperationException("InMemoryCache settings are not configured properly.");
 
+        services.Configure<InMemoryCacheSettings>(configuration.GetSection("InMemoryCache"));
+
         services.AddMemoryCache(options =>
         {
             // Abstract size units — each cached entry must set MemoryCacheEntryOptions.Size for this limit to take effect

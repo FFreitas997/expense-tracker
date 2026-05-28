@@ -1,6 +1,7 @@
 ﻿using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using IsolationLevel = System.Data.IsolationLevel;
 
 namespace Infrastructure.Repositories.Implementations;
@@ -25,44 +26,9 @@ public class UnitOfWork(
         return await context.SaveChangesAsync(ct);
     }
 
-    public async Task ExecuteInTransactionAsync(
-        Func<CancellationToken, Task> operation,
-        IsolationLevel level = IsolationLevel.ReadCommitted,
-        CancellationToken ct = default
-    )
+    public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level, CancellationToken ct = default)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(level, ct);
-
-        try
-        {
-            await operation(ct);
-            await transaction.CommitAsync(ct);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(ct);
-            throw;
-        }
-    }
-
-    public async Task<T> ExecuteInTransactionAsync<T>(
-        Func<CancellationToken, Task<T>> operation,
-        IsolationLevel level = IsolationLevel.ReadCommitted,
-        CancellationToken ct = default
-    )
-    {
-        await using var transaction = await context.Database.BeginTransactionAsync(level, ct);
-        try
-        {
-            var result = await operation(ct);
-            await transaction.CommitAsync(ct);
-            return result;
-        }
-        catch
-        {
-            await transaction.RollbackAsync(ct);
-            throw;
-        }
+        return await context.Database.BeginTransactionAsync(level, ct);
     }
 
     public void Dispose()

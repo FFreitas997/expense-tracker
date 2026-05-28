@@ -4,6 +4,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Implementations;
 
+// result pattern
+// custom exceptions
+// caching
+// logging
+// validation (FluentValidation)
+// unit of work pattern
 public class CategoryService(
     ILogger<CategoryService> logger,
     IUnitOfWork unit,
