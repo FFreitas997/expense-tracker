@@ -18,6 +18,12 @@ internal static class IdentityExtension
         if (settings is null)
             throw new InvalidOperationException("Identity settings are not configured properly.");
 
+        services
+            .AddOptions<IdentitySettings>()
+            .Bind(configuration.GetSection("Identity"))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 // Password

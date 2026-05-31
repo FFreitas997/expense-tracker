@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Repositories.Queries;
-using Infrastructure.Repositories.Queries.Enums;
 
 namespace Application.DTOs;
 

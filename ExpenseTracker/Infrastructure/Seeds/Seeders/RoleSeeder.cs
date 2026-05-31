@@ -7,8 +7,10 @@ public class RoleSeeder(RoleManager<IdentityRole<Guid>> roleManager)
 {
     public async Task SeedAsync()
     {
-        foreach (var role in Enum.GetNames<UserRole>())
-            if (!await roleManager.RoleExistsAsync(role))
-                await roleManager.CreateAsync(new IdentityRole<Guid>(role));
+        if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+            await roleManager.CreateAsync(new IdentityRole<Guid>(UserRoles.Admin));
+
+        if (!await roleManager.RoleExistsAsync(UserRoles.Member))
+            await roleManager.CreateAsync(new IdentityRole<Guid>(UserRoles.Member));
     }
 }

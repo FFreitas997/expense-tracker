@@ -1,5 +1,4 @@
 using Domain.Enums;
-using Infrastructure.Repositories.Queries.Enums;
 
 namespace Infrastructure.Repositories.Queries.User;
 
@@ -7,7 +6,7 @@ public class UserQuery : PaginationQuery
 {
     public string FullName { get; set; } = string.Empty;
 
-    public UserRole? Role { get; set; }
+    public string? Role { get; set; }
 
     public UserState? State { get; set; }
 

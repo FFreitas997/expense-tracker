@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Repositories.Queries.Category;
-using Infrastructure.Repositories.Queries.Enums;
 
 namespace Application.DTOs.Category;
 

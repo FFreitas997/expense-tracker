@@ -1,7 +1,6 @@
 ﻿using Domain.Entities;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Repositories.Queries;
-using Infrastructure.Repositories.Queries.Enums;
 using Infrastructure.Repositories.Queries.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -53,8 +52,8 @@ public class UserRepository(ILogger<UserRepository> logger, AppDbContext dbConte
             query = query.Where(u => EF.Functions.Like(u.FullName, search));
         }
 
-        if (req.Role.HasValue)
-            query = query.Where(u => u.Role == req.Role.Value);
+        if (!string.IsNullOrWhiteSpace(req.Role))
+            query = query.Where(u => u.Role == req.Role);
 
         if (req.State.HasValue)
             query = query.Where(u => u.State == req.State.Value);

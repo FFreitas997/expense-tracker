@@ -1,7 +1,6 @@
 ﻿using Domain.Entities;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Repositories.Queries;
-using Infrastructure.Repositories.Queries.Enums;
 using Infrastructure.Repositories.Queries.RecurringExpense;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -89,5 +88,13 @@ public class RecurringExpenseRepository(ILogger<RecurringExpenseRepository> logg
             Page = req.Page,
             Size = req.Size
         };
+    }
+
+    public async Task<List<RecurringExpense>> GetDueAsync(DateTime asOf, CancellationToken ct = default)
+    {
+        return await dbContext.RecurringExpenses
+            .Where(r => r.IsActive && r.NextDueDate <= asOf)
+            .Include(r => r.Category)
+            .ToListAsync(ct);
     }
 }

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.FrontOffice.V1;
 
-[Route("api/frontoffice/[controller]")]
 [ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/frontoffice/auth")]
 public class AuthController : ControllerBase
 {
 }

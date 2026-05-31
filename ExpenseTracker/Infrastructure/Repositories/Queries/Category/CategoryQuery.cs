@@ -1,6 +1,4 @@
-﻿using Infrastructure.Repositories.Queries.Enums;
-
-namespace Infrastructure.Repositories.Queries.Category;
+﻿namespace Infrastructure.Repositories.Queries.Category;
 
 public class CategoryQuery : PaginationQuery
 {

@@ -7,7 +7,7 @@ public class User : IdentityUser<Guid>
 {
     public required string FullName { get; set; }
 
-    public UserRole Role { get; set; }
+    public required string Role { get; set; }
 
     public UserState State { get; set; }
 

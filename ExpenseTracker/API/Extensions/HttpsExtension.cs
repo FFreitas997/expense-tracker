@@ -29,10 +29,7 @@ public static class HttpsExtension
     ///     Registers HSTS (HTTP Strict Transport Security) services.
     ///     Browsers will refuse plain HTTP connections for the duration of max-age.
     /// </summary>
-    public static IServiceCollection AddHstsConfiguration(
-        this IServiceCollection services,
-        IHostEnvironment env
-    )
+    public static IServiceCollection AddHstsConfiguration(this IServiceCollection services, IHostEnvironment env)
     {
         if (!env.IsDevelopment())
             services.AddHsts(options =>

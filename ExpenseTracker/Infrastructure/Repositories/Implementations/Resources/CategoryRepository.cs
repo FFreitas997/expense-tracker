@@ -2,7 +2,6 @@
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Repositories.Queries;
 using Infrastructure.Repositories.Queries.Category;
-using Infrastructure.Repositories.Queries.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

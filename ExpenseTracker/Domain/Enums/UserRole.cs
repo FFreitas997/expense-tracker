@@ -1,7 +1,7 @@
 ﻿namespace Domain.Enums;
 
-public enum UserRole
+public static class UserRoles
 {
-    Admin,
-    Member
+    public const string Admin = "Admin";
+    public const string Member = "Member";
 }

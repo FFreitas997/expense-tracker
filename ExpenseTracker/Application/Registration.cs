@@ -19,7 +19,7 @@ public static class Registration
         services.AddScoped<IExpenseService, ExpenseService>();
         services.AddScoped<IReportService, ReportService>();
 
-        services.AddAutoMapper(options => { });
+        services.AddAutoMapper(options => { options.AddMaps(Assembly.GetExecutingAssembly()); });
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;

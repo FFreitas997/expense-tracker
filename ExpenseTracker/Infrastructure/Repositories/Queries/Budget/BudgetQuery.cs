@@ -1,5 +1,4 @@
 using Domain.Enums;
-using Infrastructure.Repositories.Queries.Enums;
 
 namespace Infrastructure.Repositories.Queries.Budget;
 
