@@ -10,6 +10,7 @@ using API.Security.Cors;
 using API.Security.RateLimiting;
 using Application;
 using Infrastructure;
+using Infrastructure.Data;
 using Infrastructure.Seeds;
 using Microsoft.EntityFrameworkCore;
 
@@ -134,4 +135,4 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapControllers();
-app.Run();
+await app.RunAsync();

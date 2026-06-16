@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Infrastructure.Data;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Repositories.Queries;
 using Infrastructure.Repositories.Queries.Enums;

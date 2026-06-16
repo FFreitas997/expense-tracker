@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\User\" />
+    <Folder Include="Validators\User\" />
+  </ItemGroup>
+
 </Project>

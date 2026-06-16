@@ -1,9 +1,8 @@
-﻿using Infrastructure.Settings;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Extensions;
+namespace Infrastructure.Data;
 
 internal static class DatabaseContextExtension
 {

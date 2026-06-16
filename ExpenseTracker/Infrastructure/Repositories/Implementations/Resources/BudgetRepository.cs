@@ -1,8 +1,8 @@
 ﻿using Domain.Entities;
+using Infrastructure.Data;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Repositories.Queries;
 using Infrastructure.Repositories.Queries.Budget;
-using Infrastructure.Repositories.Queries.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

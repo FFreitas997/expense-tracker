@@ -1,10 +1,10 @@
 ﻿using Domain.Entities;
-using Infrastructure.Settings;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Extensions;
+namespace Infrastructure.Identity;
 
 internal static class IdentityExtension
 {

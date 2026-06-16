@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Infrastructure.Cache.Interfaces;
-using Infrastructure.Settings;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,14 +7,14 @@ using Microsoft.Extensions.Options;
 namespace Infrastructure.Cache.Implementations;
 
 /// <summary>
-/// <see cref="ICacheRepository"/> implementation backed by <see cref="IMemoryCache"/>.
-/// Uses a per-key <see cref="SemaphoreSlim"/> to implement a cache-aside pattern with
-/// double-checked locking, ensuring the factory delegate is invoked at most once per key
-/// even under concurrent access.
+///     <see cref="ICacheRepository" /> implementation backed by <see cref="IMemoryCache" />.
+///     Uses a per-key <see cref="SemaphoreSlim" /> to implement a cache-aside pattern with
+///     double-checked locking, ensuring the factory delegate is invoked at most once per key
+///     even under concurrent access.
 /// </summary>
 /// <param name="cache">The underlying in-process memory cache.</param>
 /// <param name="logger">Logger used to emit cache hit/miss/eviction diagnostics.</param>
-/// <param name="settings">Expiration settings bound from configuration via <see cref="InMemoryCacheSettings"/>.</param>
+/// <param name="settings">Expiration settings bound from configuration via <see cref="InMemoryCacheSettings" />.</param>
 public class InMemoryCacheRepository(
     IMemoryCache cache,
     ILogger<InMemoryCacheRepository> logger,
@@ -30,22 +29,25 @@ public class InMemoryCacheRepository(
     private readonly InMemoryCacheSettings _settings = settings.Value;
 
     /// <summary>
-    /// Returns the cached value for <paramref name="key"/> if present; otherwise invokes
-    /// <paramref name="factory"/> to produce the value, stores it in the cache, and returns it.
+    ///     Returns the cached value for <paramref name="key" /> if present; otherwise invokes
+    ///     <paramref name="factory" /> to produce the value, stores it in the cache, and returns it.
     /// </summary>
     /// <remarks>
-    /// Uses a per-key <see cref="SemaphoreSlim"/> with double-checked locking so that only one
-    /// caller executes the factory for the same key at a time, preventing cache stampedes.
-    /// <see langword="null"/> values returned by the factory are not cached.
+    ///     Uses a per-key <see cref="SemaphoreSlim" /> with double-checked locking so that only one
+    ///     caller executes the factory for the same key at a time, preventing cache stampedes.
+    ///     <see langword="null" /> values returned by the factory are not cached.
     /// </remarks>
     /// <typeparam name="T">The type of the cached value. Must be a reference type.</typeparam>
     /// <param name="key">The unique cache key.</param>
     /// <param name="factory">
-    /// Async delegate invoked on a cache miss to produce the value to cache.
-    /// Receives a <see cref="CancellationToken"/> forwarded from the caller.
+    ///     Async delegate invoked on a cache miss to produce the value to cache.
+    ///     Receives a <see cref="CancellationToken" /> forwarded from the caller.
     /// </param>
     /// <param name="ct">Token used to cancel the semaphore wait or the factory invocation.</param>
-    /// <returns>The cached or freshly produced value, or <see langword="null"/> if the factory returned <see langword="null"/>.</returns>
+    /// <returns>
+    ///     The cached or freshly produced value, or <see langword="null" /> if the factory returned
+    ///     <see langword="null" />.
+    /// </returns>
     public async Task<T?> GetOrCreateAsync<T>(string key, Func<CancellationToken, Task<T?>> factory,
         CancellationToken ct = default) where T : class
     {
@@ -89,11 +91,11 @@ public class InMemoryCacheRepository(
     }
 
     /// <summary>
-    /// Evicts the cache entry identified by <paramref name="key"/>, if one exists.
+    ///     Evicts the cache entry identified by <paramref name="key" />, if one exists.
     /// </summary>
     /// <param name="key">The unique cache key to remove.</param>
     /// <param name="ct">Not used for the in-memory implementation; included for interface compatibility.</param>
-    /// <returns>A completed <see cref="Task"/>.</returns>
+    /// <returns>A completed <see cref="Task" />.</returns>
     public Task RemoveAsync(string key, CancellationToken ct = default)
     {
         cache.Remove(key);
@@ -102,10 +104,10 @@ public class InMemoryCacheRepository(
     }
 
     /// <summary>
-    /// Builds a <see cref="MemoryCacheEntryOptions"/> instance using the expiration values
-    /// from <see cref="InMemoryCacheSettings"/>.
+    ///     Builds a <see cref="MemoryCacheEntryOptions" /> instance using the expiration values
+    ///     from <see cref="InMemoryCacheSettings" />.
     /// </summary>
-    /// <returns>A configured <see cref="MemoryCacheEntryOptions"/> ready to be passed to <see cref="IMemoryCache.Set"/>.</returns>
+    /// <returns>A configured <see cref="MemoryCacheEntryOptions" /> ready to be passed to <see cref="IMemoryCache.Set" />.</returns>
     private MemoryCacheEntryOptions CreateCacheOptions()
     {
         return new MemoryCacheEntryOptions

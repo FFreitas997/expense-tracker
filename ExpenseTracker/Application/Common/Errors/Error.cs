@@ -73,6 +73,14 @@ public sealed record Error(string Code, string Details, ErrorType Type)
         public static readonly Error EmailAlreadyInUse =
             new("user.email_already_in_use", "The provided email address is already in use.", ErrorType.Conflict);
 
+        public static readonly Error RoleAssignmentFailed =
+            new("auth.role_assignment_failed", "Failed to assign the specified role.", ErrorType.InternalServerError);
+
+        public static Error RegistrationFailed(string? error)
+        {
+            return new Error("auth.registration_failed", error ?? "Registration failed.", ErrorType.Validation);
+        }
+
         public static Error NotFound(Guid id)
         {
             return new Error("user.not_found", $"User with id {id} was not found.", ErrorType.NotFound);
@@ -92,7 +100,8 @@ public sealed record Error(string Code, string Details, ErrorType Type)
             new("auth.invalid_token", "The authentication token is invalid.", ErrorType.Unauthorized);
 
         public static readonly Error TooManyRequests =
-            new("auth.too_many_requests", "Too many authentication attempts. Please try again later.", ErrorType.TooManyRequests);
+            new("auth.too_many_requests", "Too many authentication attempts. Please try again later.",
+                ErrorType.TooManyRequests);
     }
 
     // generic errors

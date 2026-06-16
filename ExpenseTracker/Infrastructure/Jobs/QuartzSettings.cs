@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Settings;
+﻿namespace Infrastructure.Jobs;
 
 public sealed class QuartzSettings
 {

@@ -5,11 +5,16 @@ using Microsoft.Extensions.Options;
 
 namespace Application.Validators.Auth;
 
-public class LoginValidator : AbstractValidator<LoginRequestDto>
+public class RegisterValidator : AbstractValidator<RegisterRequestDto>
 {
-    public LoginValidator(IOptions<IdentitySettings> options)
+    public RegisterValidator(IOptions<IdentitySettings> options)
     {
         var passwordSettings = options.Value.Password;
+        var userSettings = options.Value.User;
+
+        RuleFor(x => x.FullName)
+            .NotEmpty().WithMessage("Full name is required.")
+            .MaximumLength(100).WithMessage("Full name must not exceed 100 characters.");
 
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
@@ -35,5 +40,10 @@ public class LoginValidator : AbstractValidator<LoginRequestDto>
         if (passwordSettings.RequireNonAlphanumeric)
             RuleFor(x => x.Password)
                 .Matches(@"[^a-zA-Z0-9]").WithMessage("Password must contain at least one non-alphanumeric character.");
+
+        RuleFor(x => x.Role)
+            .NotEmpty().WithMessage("Role is required.")
+            .Must(role => role is "Admin" or "Member")
+            .WithMessage("Role must be either 'Admin' or 'Member'.");
     }
 }

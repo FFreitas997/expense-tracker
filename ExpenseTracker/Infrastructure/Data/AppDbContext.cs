@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure;
+namespace Infrastructure.Data;
 
 /// <summary>
-/// Abstraction over <see cref="AppDbContext"/> to allow mocking in unit tests.
-/// Exposes only the DbSets and <see cref="SaveChangesAsync"/> that application code depends on.
+///     Abstraction over <see cref="AppDbContext" /> to allow mocking in unit tests.
+///     Exposes only the DbSets and <see cref="SaveChangesAsync" /> that application code depends on.
 /// </summary>
 public interface IAppDbContext
 {
@@ -33,9 +33,9 @@ public interface IAppDbContext
 }
 
 /// <summary>
-/// Entity Framework Core database context for the Expense Tracker application.
-/// Extends <see cref="IdentityDbContext{TUser, TRole, TKey}"/> to include ASP.NET Core Identity tables
-/// alongside the application-specific entities.
+///     Entity Framework Core database context for the Expense Tracker application.
+///     Extends <see cref="IdentityDbContext{TUser,TRole,TKey}" /> to include ASP.NET Core Identity tables
+///     alongside the application-specific entities.
 /// </summary>
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options), IAppDbContext
@@ -53,8 +53,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<RecurringExpense> RecurringExpenses { get; set; }
 
     /// <summary>
-    /// Configures the entity model by applying all <see cref="IEntityTypeConfiguration{TEntity}"/>
-    /// implementations found in the <see cref="Infrastructure"/> assembly.
+    ///     Configures the entity model by applying all <see cref="IEntityTypeConfiguration{TEntity}" />
+    ///     implementations found in the <see cref="Infrastructure" /> assembly.
     /// </summary>
     /// <param name="modelBuilder">The builder used to construct the model for this context.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)

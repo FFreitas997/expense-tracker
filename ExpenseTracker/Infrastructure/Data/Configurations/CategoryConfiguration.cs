@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Configurations;
+namespace Infrastructure.Data.Configurations;
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
@@ -34,7 +34,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         // Check constraint for Color to ensure it's either null or a valid hex code
         builder.ToTable(t =>
-            t.HasCheckConstraint("CK_Categories_Color_Hex", "[Color] IS NULL OR ([Color] LIKE '#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]' AND LEN([Color]) = 7)"));
+            t.HasCheckConstraint("CK_Categories_Color_Hex",
+                "[Color] IS NULL OR ([Color] LIKE '#[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]' AND LEN([Color]) = 7)"));
 
         // Indexes for performance
         builder.HasIndex(c => c.UserId).HasDatabaseName("IX_Categories_UserId");

@@ -1,6 +1,10 @@
-﻿using Infrastructure.Cache.Implementations;
+﻿using Infrastructure.Cache;
+using Infrastructure.Cache.Implementations;
 using Infrastructure.Cache.Interfaces;
-using Infrastructure.Extensions;
+using Infrastructure.Data;
+using Infrastructure.Email;
+using Infrastructure.Identity;
+using Infrastructure.Jobs;
 using Infrastructure.Repositories.Implementations.Resources;
 using Infrastructure.Repositories.Interfaces.Resources;
 using Infrastructure.Seeds;
@@ -50,6 +54,9 @@ public static class Registration
 
         // ── Quartz Jobs ───────────────────────────────────────────────
         services.AddQuartzJobs(configuration);
+
+        // ── Email Service ───────────────────────────────────────────────
+        services.AddEmailService(configuration);
 
         return services;
     }

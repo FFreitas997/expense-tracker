@@ -1,10 +1,9 @@
 ﻿using Infrastructure.Jobs.Setup;
-using Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 
-namespace Infrastructure.Extensions;
+namespace Infrastructure.Jobs;
 
 internal static class QuartzExtension
 {
