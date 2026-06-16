@@ -19,6 +19,10 @@ public sealed record Error(string Code, string Details, ErrorType Type)
         public static readonly Error CannotDeleteDefault =
             new("category.cannot_delete_default", "Default categories cannot be deleted.", ErrorType.Forbidden);
 
+        public static readonly Error CannotDeleteWithLinkedExpenses =
+            new("category.cannot_delete_with_linked_expenses",
+                "The category cannot be deleted because it has linked expenses.", ErrorType.Conflict);
+
         public static Error NotFound(Guid id)
         {
             return new Error("category.not_found", $"Category with id {id} was not found.", ErrorType.NotFound);

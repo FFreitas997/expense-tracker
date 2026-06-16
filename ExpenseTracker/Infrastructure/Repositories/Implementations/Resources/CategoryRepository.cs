@@ -78,4 +78,42 @@ public class CategoryRepository(ILogger<CategoryRepository> logger, AppDbContext
             Size = req.Size
         };
     }
+
+    public async Task<List<Category>> GetAllForUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        logger.LogInformation("Fetching all categories for user with ID {UserId}", userId);
+        return await dbContext.Categories
+            .AsNoTracking()
+            .Where(c => c.IsDefault || c.UserId == userId)
+            .OrderBy(c => !c.IsDefault) // system categories first
+            .ThenBy(c => c.Name)
+            .ToListAsync(ct);
+    }
+
+    public async Task<List<Category>> GetAllSystemAsync(CancellationToken ct = default)
+    {
+        logger.LogInformation("Fetching all system categories");
+        return await dbContext.Categories
+            .AsNoTracking()
+            .Where(c => c.IsDefault && c.UserId == null)
+            .OrderBy(c => c.Name)
+            .ToListAsync(ct);
+    }
+
+    public async Task<bool> ExistsByNameAsync(string name, Guid? userId, CancellationToken ct = default)
+    {
+        logger.LogInformation("Checking if category with name {CategoryName} exists for user with ID {UserId}", name,
+            userId);
+        return await dbContext.Categories
+            .AsNoTracking()
+            .AnyAsync(c => c.Name == name && (c.UserId == userId || c.IsDefault), ct);
+    }
+
+    public async Task<bool> HasLinkedExpensesAsync(Guid id, CancellationToken ct = default)
+    {
+        logger.LogInformation("Checking if category with ID {CategoryId} has linked expenses", id);
+        return await dbContext.Expenses
+            .AsNoTracking()
+            .AnyAsync(e => e.CategoryId == id, ct);
+    }
 }
